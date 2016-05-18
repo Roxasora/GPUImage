@@ -396,6 +396,13 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
         [_captureSession beginConfiguration];
         
         [_captureSession removeInput:videoInput];
+        
+        if (currentCameraPosition == AVCaptureDevicePositionFront) {
+            [_captureSession setSessionPreset:AVCaptureSessionPreset1280x720];
+        }else{
+            [_captureSession setSessionPreset:AVCaptureSessionPreset1920x1080];
+        }
+        
         if ([_captureSession canAddInput:newVideoInput])
         {
             [_captureSession addInput:newVideoInput];
