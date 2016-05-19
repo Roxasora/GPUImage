@@ -830,9 +830,15 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 - (void)setInputFramebuffer:(GPUImageFramebuffer *)newInputFramebuffer atIndex:(NSInteger)textureIndex;
 {
     [newInputFramebuffer lock];
-    runSynchronouslyOnContextQueue(_movieWriterContext, ^{
+    
+    if (self.disableSyncWhenSetInputFrameBuffer) {
+        NSLog(@"fucking disable sync!!");
         firstInputFramebuffer = newInputFramebuffer;
-    });
+    }else{
+        runSynchronouslyOnContextQueue(_movieWriterContext, ^{
+            firstInputFramebuffer = newInputFramebuffer;
+        });
+    }
 }
 
 - (void)setInputRotation:(GPUImageRotationMode)newInputRotation atIndex:(NSInteger)textureIndex;
