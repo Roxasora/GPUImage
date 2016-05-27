@@ -832,7 +832,6 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     [newInputFramebuffer lock];
     
     if (self.disableSyncWhenSetInputFrameBuffer) {
-        NSLog(@"fucking disable sync!!");
         firstInputFramebuffer = newInputFramebuffer;
     }else{
         runSynchronouslyOnContextQueue(_movieWriterContext, ^{
