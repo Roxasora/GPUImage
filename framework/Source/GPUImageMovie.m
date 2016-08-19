@@ -317,6 +317,16 @@
     runSynchronouslyOnVideoProcessingQueue(^{
         
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
+        if (displayLink) {
+            [displayLink invalidate]; // remove from all run loops
+            displayLink = nil;
+        }
+        if (playerItemOutput) {
+            [playerItemOutput setDelegate:nil queue:nil];
+            if (_playerItem) {
+                [_playerItem removeOutput:playerItemOutput];
+            }
+        }
         displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
         [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
         [displayLink setPaused:YES];
