@@ -317,7 +317,7 @@
     runSynchronouslyOnVideoProcessingQueue(^{
         
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-        if (playerItemOutput) {
+        if (displayLink) {
             //如果有，说明已经process过了，只尝试remove output 并 再次添加
             //            [playerItemOutput setDelegate:nil queue:nil];
             //            if (_playerItem) {
@@ -350,6 +350,12 @@
         }
         else {
             [pixBuffAttributes setObject:@(kCVPixelFormatType_32BGRA) forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+        }
+        if (playerItemOutput) {
+            if (_playerItem) {
+                [_playerItem removeOutput:playerItemOutput];
+            }
+            [playerItemOutput setDelegate:nil queue:videoProcessingQueue];
         }
         playerItemOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:pixBuffAttributes];
         [playerItemOutput setDelegate:self queue:videoProcessingQueue];
