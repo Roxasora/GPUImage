@@ -92,14 +92,47 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     
 	// Grab the back-facing or front-facing camera
     _inputCamera = nil;
-	NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-	for (AVCaptureDevice *device in devices) 
-	{
-		if ([device position] == cameraPosition)
-		{
-			_inputCamera = device;
-		}
-	}
+    
+    float version = [[[UIDevice currentDevice] systemVersion] floatValue];
+    
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
+        AVCaptureDevice *duoDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInDuoCamera mediaType:AVMediaTypeVideo position:cameraPosition];
+        if (duoDevice) {
+            _inputCamera = duoDevice;
+        } else {
+            AVCaptureDevice *wideDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera mediaType:AVMediaTypeVideo position:cameraPosition];
+            _inputCamera = wideDevice;
+        }
+//        [_inputCamera lockForConfiguration:nil];
+//        
+//        BOOL stop = NO;
+//        NSArray *formats = [_inputCamera formats];
+//        for (AVCaptureDeviceFormat *format in formats) {
+//            for (NSNumber *spaceNumber in format.supportedColorSpaces) {
+//                if (spaceNumber.integerValue == AVCaptureColorSpace_P3_D65) {
+//                    _inputCamera.activeFormat = format;
+//                    _inputCamera.activeColorSpace = AVCaptureColorSpace_P3_D65;
+//                    stop = YES;
+//                    break;
+//                }
+//            }
+//            if (stop) {
+//                break;
+//            }
+//        }
+//        
+//        [_inputCamera unlockForConfiguration];
+    } else {
+        NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+        for (AVCaptureDevice *device in devices)
+        {
+            if ([device position] == cameraPosition)
+            {
+                _inputCamera = device;
+            }
+        }
+    }
+	
     
     if (!_inputCamera) {
         return nil;
@@ -107,8 +140,12 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     
 	// Create the capture session
 	_captureSession = [[AVCaptureSession alloc] init];
+    
 	
     [_captureSession beginConfiguration];
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
+//        _captureSession.automaticallyConfiguresCaptureDeviceForWideColor = NO;
+    }
     
 	// Add the video input	
 	NSError *error = nil;
@@ -227,6 +264,10 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
 //        conn.videoMaxFrameDuration = CMTimeMake(1,60);
     
     [_captureSession commitConfiguration];
+    
+//    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
+//        NSLog(@"current color space %d", _inputCamera.activeColorSpace);
+//    }
     
 	return self;
 }
@@ -381,14 +422,61 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     }
     
     AVCaptureDevice *backFacingCamera = nil;
-    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
-	for (AVCaptureDevice *device in devices) 
-	{
-		if ([device position] == currentCameraPosition)
-		{
-			backFacingCamera = device;
-		}
-	}
+    
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
+        AVCaptureDevice *duoDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInDuoCamera mediaType:AVMediaTypeVideo position:currentCameraPosition];
+        if (duoDevice) {
+            backFacingCamera = duoDevice;
+        } else {
+            AVCaptureDevice *wideDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera mediaType:AVMediaTypeVideo position:currentCameraPosition];
+            backFacingCamera = wideDevice;
+        }
+    } else {
+        NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+        for (AVCaptureDevice *device in devices)
+        {
+            if ([device position] == currentCameraPosition)
+            {
+                backFacingCamera = device;
+            }
+        }
+    }
+    
+    NSError *lockError;
+    if ([backFacingCamera lockForConfiguration:&lockError]) {
+        if ([backFacingCamera isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus]) {
+            backFacingCamera.focusMode = AVCaptureFocusModeContinuousAutoFocus;
+        }
+        // low light boost
+        if ([backFacingCamera isLowLightBoostSupported]) {
+            [backFacingCamera setAutomaticallyEnablesLowLightBoostWhenAvailable:TRUE];
+        }
+        [backFacingCamera unlockForConfiguration];
+    } else {
+        NSLog(@"ERROR = %@", lockError);
+    }
+    
+//    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+//	for (AVCaptureDevice *device in devices) 
+//	{
+//		if ([device position] == currentCameraPosition)
+//		{
+//			backFacingCamera = device;
+//            NSError *error;
+//            if ([device lockForConfiguration:&error]) {
+//                if ([device isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus]) {
+//                    device.focusMode = AVCaptureFocusModeContinuousAutoFocus;
+//                }
+//                // low light boost
+//                if ([device isLowLightBoostSupported]) {
+//                    [device setAutomaticallyEnablesLowLightBoostWhenAvailable:TRUE];
+//                }
+//                [device unlockForConfiguration];
+//            } else {
+//                NSLog(@"ERROR = %@", error);
+//            }
+//		}
+//	}
     newVideoInput = [[AVCaptureDeviceInput alloc] initWithDevice:backFacingCamera error:&error];
     
     if (newVideoInput != nil)
@@ -418,9 +506,14 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     
     _inputCamera = backFacingCamera;
     [self setOutputImageOrientation:_outputImageOrientation];
+    
+    // stabilization
+    if ([backFacingCamera.activeFormat isVideoStabilizationModeSupported:AVCaptureVideoStabilizationModeStandard]) {
+        [self.videoCaptureConnection setPreferredVideoStabilizationMode:AVCaptureVideoStabilizationModeStandard];
+    }
 }
 
-- (AVCaptureDevicePosition)cameraPosition 
+- (AVCaptureDevicePosition)cameraPosition
 {
     return [[videoInput device] position];
 }
@@ -552,7 +645,6 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
 			}
 		}
 	}
-    
     return nil;
 }
 
