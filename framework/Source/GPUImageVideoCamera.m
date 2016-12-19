@@ -101,6 +101,7 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
             _inputCamera = duoDevice;
         } else {
             AVCaptureDevice *wideDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera mediaType:AVMediaTypeVideo position:cameraPosition];
+//            AVCaptureDevice *wideDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
             _inputCamera = wideDevice;
         }
 //        [_inputCamera lockForConfiguration:nil];
@@ -573,15 +574,55 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
 		if ([_inputCamera respondsToSelector:@selector(setActiveVideoMinFrameDuration:)] &&
             [_inputCamera respondsToSelector:@selector(setActiveVideoMaxFrameDuration:)]) {
             
-            NSError *error;
-            [_inputCamera lockForConfiguration:&error];
-            if (error == nil) {
-#if defined(__IPHONE_7_0)
-                [_inputCamera setActiveVideoMinFrameDuration:CMTimeMake(1, _frameRate)];
-                [_inputCamera setActiveVideoMaxFrameDuration:CMTimeMake(1, _frameRate)];
-#endif
+            if (_frameRate == 30) {
+                if ( YES == [_inputCamera lockForConfiguration:NULL] )
+                {
+                    [_inputCamera setActiveVideoMinFrameDuration:CMTimeMake(1,30)];
+                    [_inputCamera setActiveVideoMaxFrameDuration:CMTimeMake(1,30)];
+                    [_inputCamera unlockForConfiguration];
+                }
+            } else {
+                BOOL hasSetCorrectFrameRate = NO;
+                for(AVCaptureDeviceFormat *vFormat in [_inputCamera formats] )
+                {
+                    CMFormatDescriptionRef description= vFormat.formatDescription;
+                    float maxrate=((AVFrameRateRange*)[vFormat.videoSupportedFrameRateRanges objectAtIndex:0]).maxFrameRate;
+                    
+                    if(maxrate > (frameRate - 1) && CMFormatDescriptionGetMediaSubType(description)==kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
+                    {
+                        if ( YES == [_inputCamera lockForConfiguration:NULL] )
+                        {
+                            _inputCamera.activeFormat = vFormat;
+                            [_inputCamera setActiveVideoMinFrameDuration:CMTimeMake(1,frameRate)];
+                            [_inputCamera setActiveVideoMaxFrameDuration:CMTimeMake(1,frameRate)];
+                            [_inputCamera unlockForConfiguration];
+                            NSLog(@"formats  %@ %@ %@",vFormat.mediaType,vFormat.formatDescription,vFormat.videoSupportedFrameRateRanges);
+                            hasSetCorrectFrameRate = YES;
+                        }
+                    }
+                }
+                
+                if (!hasSetCorrectFrameRate) {
+                    if ( YES == [_inputCamera lockForConfiguration:NULL] )
+                    {
+                        [_inputCamera setActiveVideoMinFrameDuration:CMTimeMake(10,30 * 10)];
+                        [_inputCamera setActiveVideoMaxFrameDuration:CMTimeMake(10,30 * 10)];
+                        [_inputCamera unlockForConfiguration];
+                        _frameRate = 30;
+                        //                        NSLog(@"formats  %@ %@ %@",vFormat.mediaType,vFormat.formatDescription,vFormat.videoSupportedFrameRateRanges);
+                    }
+                }
             }
-            [_inputCamera unlockForConfiguration];
+            
+//            NSError *error;
+//            [_inputCamera lockForConfiguration:&error];
+//            if (error == nil) {
+//#if defined(__IPHONE_7_0)
+//                [_inputCamera setActiveVideoMinFrameDuration:CMTimeMake(1, _frameRate)];
+//                [_inputCamera setActiveVideoMaxFrameDuration:CMTimeMake(1, _frameRate)];
+//#endif
+//            }
+//            [_inputCamera unlockForConfiguration];
             
         } else {
             
@@ -630,6 +671,8 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
         }
         
 	}
+    
+    [self resetBenchmarkAverage];
 }
 
 - (int32_t)frameRate;
