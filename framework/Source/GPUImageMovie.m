@@ -531,7 +531,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     if ( AVAssetReaderStatusReading == reader.status )
     {
         float current = processingFrameTime.value * 1.0f / processingFrameTime.timescale;
-        float duration = self.asset.duration.value * 1.0f / self.asset.duration.timescale;
+        float duration = [self assetDuration];
         return current / duration;
     }
     else if ( AVAssetReaderStatusCompleted == reader.status )
@@ -542,6 +542,11 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     {
         return 0.f;
     }
+}
+
+- (float)assetDuration {
+    float duration = self.asset.duration.value * 1.0f / self.asset.duration.timescale;
+    return duration;
 }
 
 - (void)processMovieFrame:(CVPixelBufferRef)movieFrame withSampleTime:(CMTime)currentSampleTime

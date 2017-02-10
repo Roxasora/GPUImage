@@ -9,6 +9,11 @@
 #import "GPUImageMovieComposition.h"
 #import "GPUImageMovieWriter.h"
 
+@interface GPUImageMovieComposition ()
+
+@property (nonatomic, assign) float compositionDuration;
+
+@end
 @implementation GPUImageMovieComposition
 
 @synthesize compositon = _compositon;
@@ -35,7 +40,6 @@
 - (AVAssetReader*)createAssetReader
  {
     //NSLog(@"creating reader from composition: %@, video: %@, audio: %@ with duration: %@", _compositon, _videoComposition, _audioMix, CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, _compositon.duration)));
-
     NSError *error = nil;
     AVAssetReader *assetReader = [AVAssetReader assetReaderWithAsset:self.compositon error:&error];
 
@@ -65,6 +69,17 @@
     }
 
     return assetReader;
+}
+
+- (float)assetDuration {
+    if (self.compositionDuration == 0) {
+        AVAssetTrack *videoTrack = [[self.compositon tracksWithMediaType:AVMediaTypeVideo] firstObject];
+        
+        CMTime duration = videoTrack.timeRange.duration;
+        
+        self.compositionDuration = videoTrack.timeRange.duration.value * 1.0 / videoTrack.timeRange.duration.timescale;
+    }
+    return self.compositionDuration;
 }
 
 @end
