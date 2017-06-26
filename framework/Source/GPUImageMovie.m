@@ -141,6 +141,8 @@
 {
     [playerItemOutput setDelegate:nil queue:nil];
     
+    NSLog(@"gpumovie dealloced");
+    
     // Moved into endProcessing
     //if (self.playerItem && (displayLink != nil))
     //{
@@ -149,8 +151,7 @@
     //}
 }
 
-#pragma mark -
-#pragma mark Movie processing
+#pragma mark - Movie processing
 
 - (void)enableSynchronizedEncodingUsingMovieWriter:(GPUImageMovieWriter *)movieWriter;
 {
@@ -419,11 +420,15 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     if ([playerItemOutput hasNewPixelBufferForItemTime:outputItemTime]) {
         __unsafe_unretained GPUImageMovie *weakSelf = self;
         CVPixelBufferRef pixelBuffer = [playerItemOutput copyPixelBufferForItemTime:outputItemTime itemTimeForDisplay:NULL];
-        if( pixelBuffer )
+        if( pixelBuffer ) {
             runSynchronouslyOnVideoProcessingQueue(^{
                 [weakSelf processMovieFrame:pixelBuffer withSampleTime:outputItemTime];
                 CFRelease(pixelBuffer);
             });
+        } else {
+            NSLog(@"playeritem output has no new pixel buffer for time %lld,%d", outputItemTime.value, outputItemTime.timescale);
+        }
+    } else {
     }
 }
 

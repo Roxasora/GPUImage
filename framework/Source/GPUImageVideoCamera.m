@@ -142,11 +142,7 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
 	// Create the capture session
 	_captureSession = [[AVCaptureSession alloc] init];
     
-	
     [_captureSession beginConfiguration];
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
-//        _captureSession.automaticallyConfiguresCaptureDeviceForWideColor = NO;
-    }
     
 	// Add the video input	
 	NSError *error = nil;
@@ -447,10 +443,6 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     if ([backFacingCamera lockForConfiguration:&lockError]) {
         if ([backFacingCamera isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus]) {
             backFacingCamera.focusMode = AVCaptureFocusModeContinuousAutoFocus;
-        }
-        // low light boost
-        if ([backFacingCamera isLowLightBoostSupported]) {
-            [backFacingCamera setAutomaticallyEnablesLowLightBoostWhenAvailable:TRUE];
         }
         [backFacingCamera unlockForConfiguration];
     } else {

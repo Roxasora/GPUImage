@@ -3,6 +3,7 @@
 #import "GPUImageContext.h"
 #import "GLProgram.h"
 #import "GPUImageFilter.h"
+#import <sys/utsname.h>
 
 NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 (
@@ -160,6 +161,10 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
         dispatch_release(videoQueue);
     }
 #endif
+    
+    NSLog(@"gpumoviewriter dealloced");
+    
+    assetWriter = nil;
 }
 
 #pragma mark -
@@ -198,10 +203,30 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
         [settings setObject:AVVideoCodecH264 forKey:AVVideoCodecKey];
         [settings setObject:[NSNumber numberWithInt:videoSize.width] forKey:AVVideoWidthKey];
         [settings setObject:[NSNumber numberWithInt:videoSize.height] forKey:AVVideoHeightKey];
+        
+        struct utsname systemInfo;
+        uname(&systemInfo);
+        NSString *model = [NSString stringWithCString:systemInfo.machine
+                                             encoding:NSUTF8StringEncoding];
+        
+        BOOL useLowBitRate = NO;
+        if ([model rangeOfString:@"iPhone9"].location == NSNotFound) {
+            //not iphone 7
+            useLowBitRate = YES;
+        }
+        if (useLowBitRate) {
+            NSDictionary *codecSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+                                           [NSNumber numberWithInt:4000*1024], AVVideoAverageBitRateKey,
+                                           [NSNumber numberWithInt:4000*1024], AVVideoAverageBitRateKey,
+                                           [NSNumber numberWithInt:30],AVVideoMaxKeyFrameIntervalKey,
+                                           nil];
+            [settings setObject:codecSettings forKey:AVVideoCompressionPropertiesKey];
+        }
+        
         outputSettings = settings;
     }
     // custom output settings specified
-    else 
+    else
     {
 		__unused NSString *videoCodec = [outputSettings objectForKey:AVVideoCodecKey];
 		__unused NSNumber *width = [outputSettings objectForKey:AVVideoWidthKey];

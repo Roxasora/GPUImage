@@ -216,6 +216,9 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
     
     BOOL updatedMovieFrameOppositeStillImage = NO;
     
+    //! indicate that if there is a still image source in the beginning of filter chain.
+    BOOL updatingStillImage = NO;
+    
     if (textureIndex == 0)
     {
         hasReceivedFirstFrame = YES;
@@ -231,6 +234,10 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
             {
                 updatedMovieFrameOppositeStillImage = YES;
             }
+        }
+        
+        if (CMTIME_IS_INDEFINITE(frameTime) && CMTIME_IS_INDEFINITE(secondFrameTime)) {
+            updatingStillImage = YES;
         }
     }
     else
@@ -252,7 +259,7 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
     }
 
     // || (hasReceivedFirstFrame && secondFrameCheckDisabled) || (hasReceivedSecondFrame && firstFrameCheckDisabled)
-    if ((hasReceivedFirstFrame && hasReceivedSecondFrame) || updatedMovieFrameOppositeStillImage)
+    if ((hasReceivedFirstFrame && hasReceivedSecondFrame) || updatedMovieFrameOppositeStillImage || updatingStillImage)
     {
         CMTime passOnFrameTime = (!CMTIME_IS_INDEFINITE(firstFrameTime)) ? firstFrameTime : secondFrameTime;
         [super newFrameReadyAtTime:passOnFrameTime atIndex:0]; // Bugfix when trying to record: always use time from first input (unless indefinite, in which case use the second input)

@@ -163,6 +163,8 @@ NSString *const kGPUImagePassthroughFragmentShaderString = SHADER_STRING
     }
 #endif
 
+    NSLog(@"gpuimage filter dealloced %@", self);
+
 }
 
 #pragma mark -

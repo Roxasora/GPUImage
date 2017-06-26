@@ -34,6 +34,14 @@
 	<array>
 		<string>armv7</string>
 	</array>
+    <key>NSCameraUsageDescription</key>
+    <string>dsadsad</string>
+    <key>NSLocationUsageDescription</key>
+    <string>dasdsadsad</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>microphoneDesciption</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>photoLibraryDesciption</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

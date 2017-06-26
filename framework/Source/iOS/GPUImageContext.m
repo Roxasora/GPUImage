@@ -44,6 +44,10 @@ static void *openGLESContextQueueKey;
     return self;
 }
 
+- (void)dealloc {
+    NSLog(@"gpu image context dealloced");
+}
+
 + (void *)contextKey {
 	return openGLESContextQueueKey;
 }

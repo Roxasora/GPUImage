@@ -117,6 +117,9 @@ NSString *const kGPUImageSharpenFragmentShaderString = SHADER_STRING
 
 - (void)setupFilterForSize:(CGSize)filterFrameSize;
 {
+    //统一这里该死的输入尺寸，避免渲染时和预览时不一致
+//    filterFrameSize = CGSizeMake(1000, filterFrameSize.height * 1000 / filterFrameSize.width);
+    filterFrameSize = CGSizeMake(1000, 1000);
     runSynchronouslyOnVideoProcessingQueue(^{
         [GPUImageContext setActiveShaderProgram:filterProgram];
         
