@@ -136,6 +136,15 @@
     }
 }
 
+- (void)setFilterEffectsDirectionRotation:(GPUImageRotationMode)filterEffectsDirectionRotation {
+    for (GPUImageFilter *currentFilter in _initialFilters)
+    {
+        if ([currentFilter isMemberOfClass:[GPUImageFilter class]]) {
+            [currentFilter setFilterEffectsDirectionRotation:filterEffectsDirectionRotation];
+        }
+    }
+}
+
 - (void)forceProcessingAtSize:(CGSize)frameSize;
 {
     for (GPUImageOutput<GPUImageInput> *currentFilter in filters)

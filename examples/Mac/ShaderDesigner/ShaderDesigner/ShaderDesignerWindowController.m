@@ -2,7 +2,7 @@
 
 NSString *const kGPUImageInitialVertexShaderString = @"attribute vec4 position;\nattribute vec4 inputTextureCoordinate;\n\nvarying vec2 textureCoordinate;\n\nvoid main()\n{\n\tgl_Position = position;\n\ttextureCoordinate = inputTextureCoordinate.xy;\n}\n";
 
-NSString *const kGPUImageInitialFragmentShaderString = @"varying vec2 textureCoordinate;\n\nuniform sampler2D inputImageTexture;\n\nvoid main()\n{\n\tgl_FragColor = texture2D(inputImageTexture, textureCoordinate);\n}\n";
+NSString *const kGPUImageInitialFragmentShaderString = @"varying vec2 textureCoordinate;\n\nuniform sampler2D inputImageTexture;\n\nvoid main()\n{\n\tvec4 originalColor = texture2D(inputImageTexture, textureCoordinate);\n\tgl_FragColor = originalColor;\n\tvec2 fragCoord = textureCoordinate;\n\tfloat iGlobalTime = 3.0;\n\tvec2 iResolution = vec2(1.0 ,1.0);\n}\n";
 
 
 @interface ShaderDesignerWindowController ()

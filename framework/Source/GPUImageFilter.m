@@ -681,6 +681,10 @@ NSString *const kGPUImagePassthroughFragmentShaderString = SHADER_STRING
     inputRotation = newInputRotation;
 }
 
+- (void)setFilterEffectsDirectionRotation:(GPUImageRotationMode)filterEffectsDirectionRotation {
+    _filterEffectsDirectionRotation = filterEffectsDirectionRotation;
+}
+
 - (void)forceProcessingAtSize:(CGSize)frameSize;
 {    
     if (CGSizeEqualToSize(frameSize, CGSizeZero))

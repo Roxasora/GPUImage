@@ -25,6 +25,12 @@ extern dispatch_queue_attr_t GPUImageDefaultQueueAttribute(void);
 
 static void *openGLESContextQueueKey;
 
++ (void)initialize {
+    if (!_sharedInstances) {
+        _sharedInstances = [NSMutableDictionary dictionary];
+    }
+}
+
 - (id)init;
 {
     if (!(self = [super init]))
@@ -46,22 +52,41 @@ static void *openGLESContextQueueKey;
 
 - (void)dealloc {
     NSLog(@"gpu image context dealloced");
+    _context = nil;
 }
 
 + (void *)contextKey {
 	return openGLESContextQueueKey;
 }
 
+static NSMutableDictionary *_sharedInstances = nil;
+
 // Based on Colin Wheeler's example here: http://cocoasamurai.blogspot.com/2011/04/singletons-your-doing-them-wrong.html
 + (GPUImageContext *)sharedImageProcessingContext;
 {
-    static dispatch_once_t pred;
-    static GPUImageContext *sharedImageProcessingContext = nil;
+    NSString *instanceClass = NSStringFromClass(self);
     
-    dispatch_once(&pred, ^{
-        sharedImageProcessingContext = [[[self class] alloc] init];
-    });
-    return sharedImageProcessingContext;
+//    static dispatch_once_t pred;
+    GPUImageContext *sharedInstance = nil;
+    
+    sharedInstance = [_sharedInstances objectForKey:instanceClass];
+    
+    // If there's no instance – create one and add it to the dictionary
+    if (sharedInstance == nil) {
+        sharedInstance = [[[self class] alloc] init];
+        [_sharedInstances setObject:sharedInstance forKey:instanceClass];
+    }
+    
+//    dispatch_once(&pred, ^{
+//        sharedImageProcessingContext = [[[self class] alloc] init];
+//        [_sharedInstances setObject:sharedImageProcessingContext forKey:instanceClass];
+//    });
+    return sharedInstance;
+}
+
++ (void)destroyInstance
+{
+    [_sharedInstances removeObjectForKey:NSStringFromClass(self)];
 }
 
 + (dispatch_queue_t)sharedContextQueue;

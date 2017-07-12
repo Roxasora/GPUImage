@@ -23,6 +23,7 @@ typedef NS_ENUM(NSUInteger, GPUImageRotationMode) {
 @property(readonly) CVOpenGLESTextureCacheRef coreVideoTextureCache;
 @property(readonly) GPUImageFramebufferCache *framebufferCache;
 
++ (void)destroyInstance;
 + (void *)contextKey;
 + (GPUImageContext *)sharedImageProcessingContext;
 + (dispatch_queue_t)sharedContextQueue;
