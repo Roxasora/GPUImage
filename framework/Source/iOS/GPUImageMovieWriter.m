@@ -36,6 +36,10 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     BOOL audioEncodingIsFinished, videoEncodingIsFinished;
 
     BOOL isRecording;
+    
+    BOOL allowWriteAudio, willFinish;
+    
+    void(^completeHandler)();
 }
 
 // Movie recording
@@ -87,6 +91,9 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     alreadyFinishedRecording = NO;
     videoEncodingIsFinished = NO;
     audioEncodingIsFinished = NO;
+    
+    allowWriteAudio = NO;
+    willFinish = NO;
 
     discont = NO;
     videoSize = newSize;
@@ -301,6 +308,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
         if (audioInputReadyCallback == NULL)
         {
             [assetWriter startWriting];
+            allowWriteAudio = NO;
         }
     });
     isRecording = YES;
@@ -347,14 +355,27 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 - (void)finishRecordingWithCompletionHandler:(void (^)(void))handler;
 {
     runSynchronouslyOnContextQueue(_movieWriterContext, ^{
-        isRecording = NO;
+        willFinish = NO;
         
         if (assetWriter.status == AVAssetWriterStatusCompleted || assetWriter.status == AVAssetWriterStatusCancelled || assetWriter.status == AVAssetWriterStatusUnknown)
         {
+            isRecording = NO;
             if (handler)
                 runAsynchronouslyOnContextQueue(_movieWriterContext, handler);
             return;
         }
+        
+        allowWriteAudio = false;
+        if (CMTimeCompare(previousFrameTime, previousAudioTime) == -1) {
+            // recoreded audio frame is longer than video frame
+            willFinish = true;
+            completeHandler = handler;
+            return;
+        }
+        
+        completeHandler = nil;
+        isRecording = NO;
+        
         if( assetWriter.status == AVAssetWriterStatusWriting && ! videoEncodingIsFinished )
         {
             videoEncodingIsFinished = YES;
@@ -391,7 +412,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 
 - (void)processAudioBuffer:(CMSampleBufferRef)audioBuffer;
 {
-    if (!isRecording || _paused)
+    if (!allowWriteAudio || !isRecording || _paused)
     {
         return;
     }
@@ -723,6 +744,12 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 
 - (void)newFrameReadyAtTime:(CMTime)frameTime atIndex:(NSInteger)textureIndex;
 {
+    
+    if(willFinish && CMTimeCompare(previousFrameTime, previousAudioTime) != -1) {
+        willFinish = false;
+        [self finishRecordingWithCompletionHandler:completeHandler];
+    }
+    
     if (!isRecording || _paused)
     {
         [firstInputFramebuffer unlock];
@@ -770,6 +797,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
             
             [assetWriter startSessionAtSourceTime:frameTime];
             startTime = frameTime;
+            allowWriteAudio = YES;
         });
     }
 
