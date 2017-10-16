@@ -343,33 +343,44 @@
         CVDisplayLinkSetOutputCallback(displayLink, renderCallback, (__bridge void *)self);
         CVDisplayLinkStop(displayLink);
 #endif
-
-        dispatch_queue_t videoProcessingQueue = [GPUImageContext sharedContextQueue];
-        NSMutableDictionary *pixBuffAttributes = [NSMutableDictionary dictionary];
-        if ([GPUImageContext supportsFastTextureUpload]) {
-            [pixBuffAttributes setObject:@(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) forKey:(id)kCVPixelBufferPixelFormatTypeKey];
-        }
-        else {
-            [pixBuffAttributes setObject:@(kCVPixelFormatType_32BGRA) forKey:(id)kCVPixelBufferPixelFormatTypeKey];
-        }
-        if (playerItemOutput) {
-            if (_playerItem) {
-                [_playerItem removeOutput:playerItemOutput];
-            }
-            [playerItemOutput setDelegate:nil queue:videoProcessingQueue];
-        }
-        playerItemOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:pixBuffAttributes];
-        [playerItemOutput setDelegate:self queue:videoProcessingQueue];
-
-        [_playerItem addOutput:playerItemOutput];
-        [playerItemOutput requestNotificationOfMediaDataChangeWithAdvanceInterval:0.1];
+        
+        [self generateVideoOutput];
+        
     });
+}
+
+
+- (void)generateVideoOutput {
+    dispatch_queue_t videoProcessingQueue = [GPUImageContext sharedContextQueue];
+    NSMutableDictionary *pixBuffAttributes = [NSMutableDictionary dictionary];
+    if ([GPUImageContext supportsFastTextureUpload]) {
+        [pixBuffAttributes setObject:@(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+    }
+    else {
+        [pixBuffAttributes setObject:@(kCVPixelFormatType_32BGRA) forKey:(id)kCVPixelBufferPixelFormatTypeKey];
+    }
+    if (playerItemOutput) {
+        if (_playerItem) {
+            [_playerItem removeOutput:playerItemOutput];
+        }
+        [playerItemOutput setDelegate:nil queue:videoProcessingQueue];
+    }
+    playerItemOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:pixBuffAttributes];
+    [playerItemOutput setDelegate:self queue:videoProcessingQueue];
+    
+    [_playerItem addOutput:playerItemOutput];
+    [playerItemOutput requestNotificationOfMediaDataChangeWithAdvanceInterval:0.1];
 }
 
 - (void)outputMediaDataWillChange:(AVPlayerItemOutput *)sender
 {
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
 	// Restart display link.
+    if (![playerItemOutput hasNewPixelBufferForItemTime:CMTimeMake(1, 10)]) {
+        //!根据之前的测试和推断，有可能在视频重新创建时会无法继续播放，要在这里检测然后重新生成 output ，索引自https://stackoverflow.com/questions/24800742/iosavplayeritemvideooutput-hasnewpixelbufferforitemtime-doesnt-work-correctly
+        [self generateVideoOutput];
+        NSLog(@"fuck ");
+    }
 	[displayLink setPaused:NO];
 #else
     CVDisplayLinkStart(displayLink);
@@ -503,7 +514,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
         {
             if (!keepLooping) {
                 audioEncodingIsFinished = YES;
-                if( videoEncodingIsFinished && audioEncodingIsFinished )
+                if( videoEncodingIsFinished && audioEncodingIsFinished)
                     [self endProcessing];
             }
         }
