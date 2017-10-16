@@ -93,7 +93,7 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
 	// Grab the back-facing or front-facing camera
     _inputCamera = nil;
     
-    float version = [[[UIDevice currentDevice] systemVersion] floatValue];
+//    float version = [[[UIDevice currentDevice] systemVersion] floatValue];
     
     if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
         AVCaptureDevice *duoDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInDuoCamera mediaType:AVMediaTypeVideo position:cameraPosition];
@@ -481,7 +481,11 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
         if (currentCameraPosition == AVCaptureDevicePositionFront) {
             [_captureSession setSessionPreset:AVCaptureSessionPreset1280x720];
         }else{
-            [_captureSession setSessionPreset:AVCaptureSessionPreset1920x1080];
+            if (_captureSessionPreset) {
+                [_captureSession setSessionPreset:_captureSessionPreset];
+            } else {
+                [_captureSession setSessionPreset:AVCaptureSessionPreset1920x1080];
+            }
         }
         
         if ([_captureSession canAddInput:newVideoInput])
