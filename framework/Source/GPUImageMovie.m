@@ -47,7 +47,6 @@
 
 #pragma mark -
 #pragma mark Initialization and teardown
-
 - (id)initWithURL:(NSURL *)url;
 {
     if (!(self = [super init])) 
@@ -161,6 +160,11 @@
 
 - (void)startProcessing
 {
+    if (self.isProcessing) {
+        return;
+    }
+    self.isProcessing = YES;
+
     if( self.playerItem ) {
         [self processPlayerItem];
         return;
@@ -318,15 +322,15 @@
     runSynchronouslyOnVideoProcessingQueue(^{
         
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
-        if (displayLink) {
-            //如果有，说明已经process过了，只尝试remove output 并 再次添加
-            //            [playerItemOutput setDelegate:nil queue:nil];
-            //            if (_playerItem) {
-            [_playerItem removeOutput:playerItemOutput];
-            [_playerItem addOutput:playerItemOutput];
-            return;
-            //            }
-        }
+//        if (displayLink) {
+//            //如果有，说明已经process过了，只尝试remove output 并 再次添加
+//            //            [playerItemOutput setDelegate:nil queue:nil];
+//            //            if (_playerItem) {
+//            [_playerItem removeOutput:playerItemOutput];
+//            [_playerItem addOutput:playerItemOutput];
+//            return;
+//            //            }
+//        }
         displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(displayLinkCallback:)];
         [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
         [displayLink setPaused:YES];
@@ -376,10 +380,10 @@
 {
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
 	// Restart display link.
-    if (![playerItemOutput hasNewPixelBufferForItemTime:CMTimeMake(1, 10)]) {
+    if (![playerItemOutput hasNewPixelBufferForItemTime:CMTimeMake(5, 10)]) {
         //!根据之前的测试和推断，有可能在视频重新创建时会无法继续播放，要在这里检测然后重新生成 output ，索引自https://stackoverflow.com/questions/24800742/iosavplayeritemvideooutput-hasnewpixelbufferforitemtime-doesnt-work-correctly
-        [self generateVideoOutput];
-        NSLog(@"fuck ");
+//        [self generateVideoOutput];
+        NSLog(@"fuck");
     }
 	[displayLink setPaused:NO];
 #else
@@ -440,6 +444,13 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
             NSLog(@"playeritem output has no new pixel buffer for time %lld,%d", outputItemTime.value, outputItemTime.timescale);
         }
     } else {
+//        if (_playerItem && CMTimeGetSeconds(outputItemTime) > 0.2) {
+//            if (_playerItem.outputs.count == 0) {
+//                [_playerItem addOutput:playerItemOutput];
+//            } else {
+//                [_playerItem removeOutput:playerItemOutput];
+//            }
+//        }
     }
 }
 
@@ -848,6 +859,8 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
         [self.delegate didCompletePlayingMovie];
     }
     self.delegate = nil;
+    
+    self.isProcessing = NO;
 }
 
 - (void)cancelProcessing

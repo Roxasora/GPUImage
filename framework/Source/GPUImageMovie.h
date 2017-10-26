@@ -35,6 +35,13 @@
  */
 @property(readonly, nonatomic) float progress;
 
+
+/**
+ This determines whether it is processing the movie
+ */
+@property(assign, nonatomic) BOOL isProcessing;
+
+
 /** This is used to send the delete Movie did complete playing alert
  */
 @property (readwrite, nonatomic, assign) id <GPUImageMovieDelegate>delegate;

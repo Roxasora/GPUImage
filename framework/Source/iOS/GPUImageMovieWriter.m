@@ -798,7 +798,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     if (CMTIME_IS_INVALID(startTime))
     {
         runSynchronouslyOnContextQueue(_movieWriterContext, ^{
-            if ((videoInputReadyCallback == NULL) && (assetWriter.status != AVAssetWriterStatusWriting))
+            if ((videoInputReadyCallback == NULL) && (assetWriter.status != AVAssetWriterStatusWriting) && (assetWriter.status != AVAssetWriterStatusFailed))
             {
                 [assetWriter startWriting];
             }
