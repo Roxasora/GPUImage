@@ -230,10 +230,20 @@
 #pragma mark -
 #pragma mark Handling fill mode
 
+- (void)setBounds:(CGRect)bounds {
+    [super setBounds:bounds];
+    self.selfBounds = bounds;
+}
+
+- (void)setFrame:(CGRect)frame {
+    [super setFrame:frame];
+    self.selfBounds = self.bounds;
+}
+
 - (void)recalculateViewGeometry;
 {
     
-    CGSize currentViewSize = self.bounds.size;
+    CGSize currentViewSize = self.selfBounds.size;
 
     
     runSynchronouslyOnVideoProcessingQueue(^{
@@ -243,7 +253,7 @@
         //    CGFloat imageAspectRatio = inputImageSize.width / inputImageSize.height;
         //    CGFloat viewAspectRatio = currentViewSize.width / currentViewSize.height;
         
-        CGRect insetRect = AVMakeRectWithAspectRatioInsideRect(inputImageSize, self.bounds);
+        CGRect insetRect = AVMakeRectWithAspectRatioInsideRect(inputImageSize, self.selfBounds);
         
         switch(_fillMode)
         {

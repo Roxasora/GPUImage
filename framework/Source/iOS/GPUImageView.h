@@ -25,6 +25,12 @@ typedef NS_ENUM(NSUInteger, GPUImageFillModeType) {
  */
 @property(readonly, nonatomic) CGSize sizeInPixels;
 
+
+/**
+ 此属性是为了解决在非主线程不能访问 UIView.bounds 问题
+ */
+@property(assign, nonatomic) CGRect selfBounds;
+
 @property(nonatomic) BOOL enabled;
 
 /** Handling fill mode

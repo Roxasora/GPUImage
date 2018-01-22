@@ -75,7 +75,7 @@
     if (self.compositionDuration == 0) {
         AVAssetTrack *videoTrack = [[self.compositon tracksWithMediaType:AVMediaTypeVideo] firstObject];
         
-        CMTime duration = videoTrack.timeRange.duration;
+//        CMTime duration = videoTrack.timeRange.duration;
         
         self.compositionDuration = videoTrack.timeRange.duration.value * 1.0 / videoTrack.timeRange.duration.timescale;
     }
