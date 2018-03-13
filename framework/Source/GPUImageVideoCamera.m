@@ -400,7 +400,7 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     capturePaused = NO;
 }
 
-- (void)rotateCamera
+- (void)rotateCamera:(NSString *)frontCameraPreset backPreset:(NSString *)backCameraPreset
 {
 	if (self.frontFacingCameraPresent == NO)
 		return;
@@ -479,12 +479,12 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
         [_captureSession removeInput:videoInput];
         
         if (currentCameraPosition == AVCaptureDevicePositionFront) {
-            [_captureSession setSessionPreset:AVCaptureSessionPreset1280x720];
-        }else{
+            [_captureSession setSessionPreset:frontCameraPreset];
+        } else {
             if (_captureSessionPreset) {
                 [_captureSession setSessionPreset:_captureSessionPreset];
             } else {
-                [_captureSession setSessionPreset:AVCaptureSessionPreset1920x1080];
+                [_captureSession setSessionPreset:backCameraPreset];
             }
         }
         

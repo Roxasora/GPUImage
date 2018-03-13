@@ -74,6 +74,8 @@ static NSMutableDictionary *_sharedInstances = nil;
     // If there's no instance – create one and add it to the dictionary
     if (sharedInstance == nil) {
         sharedInstance = [[[self class] alloc] init];
+        // Use yuv format as default
+        sharedInstance.useYuvFormat = YES;
         [_sharedInstances setObject:sharedInstance forKey:instanceClass];
     }
     
