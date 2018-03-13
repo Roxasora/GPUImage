@@ -18,6 +18,7 @@ typedef NS_ENUM(NSUInteger, GPUImageRotationMode) {
 @interface GPUImageContext : NSObject
 
 @property(readonly, nonatomic) dispatch_queue_t contextQueue;
+@property(readwrite, nonatomic, assign) BOOL useYuvFormat;
 @property(readwrite, retain, nonatomic) GLProgram *currentShaderProgram;
 @property(readonly, retain, nonatomic) EAGLContext *context;
 @property(readonly) CVOpenGLESTextureCacheRef coreVideoTextureCache;

@@ -87,7 +87,7 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     capturePaused = NO;
     outputRotation = kGPUImageNoRotation;
     internalRotation = kGPUImageNoRotation;
-    captureAsYUV = YES;
+    captureAsYUV = [GPUImageContext sharedImageProcessingContext].useYuvFormat;
     _preferredConversion = kColorConversion709;
     
 	// Grab the back-facing or front-facing camera
@@ -918,7 +918,7 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
         int bytesPerRow = (int) CVPixelBufferGetBytesPerRow(cameraFrame);
         outputFramebuffer = [[GPUImageContext sharedFramebufferCache] fetchFramebufferForSize:CGSizeMake(bytesPerRow / 4, bufferHeight) onlyTexture:YES];
         [outputFramebuffer activateFramebuffer];
-
+        
         glBindTexture(GL_TEXTURE_2D, [outputFramebuffer texture]);
         
         //        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bufferWidth, bufferHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, CVPixelBufferGetBaseAddress(cameraFrame));

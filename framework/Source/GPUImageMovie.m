@@ -206,7 +206,7 @@
     AVAssetReader *assetReader = [AVAssetReader assetReaderWithAsset:self.asset error:&error];
 
     NSMutableDictionary *outputSettings = [NSMutableDictionary dictionary];
-    if ([GPUImageContext supportsFastTextureUpload]) {
+    if ([GPUImageContext supportsFastTextureUpload] && [GPUImageContext sharedImageProcessingContext].useYuvFormat) {
         [outputSettings setObject:@(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) forKey:(id)kCVPixelBufferPixelFormatTypeKey];
         isFullYUVRange = YES;
     }
@@ -357,7 +357,7 @@
 - (void)generateVideoOutput {
     dispatch_queue_t videoProcessingQueue = [GPUImageContext sharedContextQueue];
     NSMutableDictionary *pixBuffAttributes = [NSMutableDictionary dictionary];
-    if ([GPUImageContext supportsFastTextureUpload]) {
+    if ([GPUImageContext supportsFastTextureUpload] && [GPUImageContext sharedImageProcessingContext].useYuvFormat) {
         [pixBuffAttributes setObject:@(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) forKey:(id)kCVPixelBufferPixelFormatTypeKey];
     }
     else {
@@ -618,7 +618,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     // Fix issue 1580
     [GPUImageContext useImageProcessingContext];
     
-    if ([GPUImageContext supportsFastTextureUpload])
+    if ([GPUImageContext supportsFastTextureUpload] && [GPUImageContext sharedImageProcessingContext].useYuvFormat)
     {
         
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
@@ -775,28 +775,56 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     }
     else
     {
-        // Upload to texture
+//        // Upload to texture
+//        CVPixelBufferLockBaseAddress(movieFrame, 0);
+//
+//        outputFramebuffer = [[GPUImageContext sharedFramebufferCache] fetchFramebufferForSize:CGSizeMake(bufferWidth, bufferHeight) textureOptions:self.outputTextureOptions onlyTexture:YES];
+//
+//        glBindTexture(GL_TEXTURE_2D, [outputFramebuffer texture]);
+//        // Using BGRA extension to pull in video frame data directly
+//        glTexImage2D(GL_TEXTURE_2D,
+//                     0,
+//                     self.outputTextureOptions.internalFormat,
+//                     bufferWidth,
+//                     bufferHeight,
+//                     0,
+//                     self.outputTextureOptions.format,
+//                     self.outputTextureOptions.type,
+//                     CVPixelBufferGetBaseAddress(movieFrame));
+//
+//        for (id<GPUImageInput> currentTarget in targets)
+//        {
+//            NSInteger indexOfObject = [targets indexOfObject:currentTarget];
+//            NSInteger targetTextureIndex = [[targetTextureIndices objectAtIndex:indexOfObject] integerValue];
+//            [currentTarget setInputSize:CGSizeMake(bufferWidth, bufferHeight) atIndex:targetTextureIndex];
+//            [currentTarget setInputFramebuffer:outputFramebuffer atIndex:targetTextureIndex];
+//        }
+//
+//        [outputFramebuffer unlock];
+//
+//        for (id<GPUImageInput> currentTarget in targets)
+//        {
+//            NSInteger indexOfObject = [targets indexOfObject:currentTarget];
+//            NSInteger targetTextureIndex = [[targetTextureIndices objectAtIndex:indexOfObject] integerValue];
+//            [currentTarget newFrameReadyAtTime:currentSampleTime atIndex:targetTextureIndex];
+//        }
+//        CVPixelBufferUnlockBaseAddress(movieFrame, 0);
         CVPixelBufferLockBaseAddress(movieFrame, 0);
         
-        outputFramebuffer = [[GPUImageContext sharedFramebufferCache] fetchFramebufferForSize:CGSizeMake(bufferWidth, bufferHeight) textureOptions:self.outputTextureOptions onlyTexture:YES];
-
+        int bytesPerRow = (int) CVPixelBufferGetBytesPerRow(movieFrame);
+        
+        outputFramebuffer = [[GPUImageContext sharedFramebufferCache] fetchFramebufferForSize:CGSizeMake(bytesPerRow / 4, bufferHeight) onlyTexture:YES];
+        
         glBindTexture(GL_TEXTURE_2D, [outputFramebuffer texture]);
         // Using BGRA extension to pull in video frame data directly
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     self.outputTextureOptions.internalFormat,
-                     bufferWidth,
-                     bufferHeight,
-                     0,
-                     self.outputTextureOptions.format,
-                     self.outputTextureOptions.type,
-                     CVPixelBufferGetBaseAddress(movieFrame));
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bytesPerRow / 4, bufferHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, CVPixelBufferGetBaseAddress(movieFrame));
+        
         
         for (id<GPUImageInput> currentTarget in targets)
         {
             NSInteger indexOfObject = [targets indexOfObject:currentTarget];
             NSInteger targetTextureIndex = [[targetTextureIndices objectAtIndex:indexOfObject] integerValue];
-            [currentTarget setInputSize:CGSizeMake(bufferWidth, bufferHeight) atIndex:targetTextureIndex];
+            [currentTarget setInputSize:CGSizeMake(bytesPerRow / 4, bufferHeight) atIndex:targetTextureIndex];
             [currentTarget setInputFramebuffer:outputFramebuffer atIndex:targetTextureIndex];
         }
         
