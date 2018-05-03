@@ -1,11 +1,15 @@
 #import "ShaderDesignerWindowController.h"
+#import "GPUImageTestFilter.h"
 
-NSString *const kGPUImageInitialVertexShaderString = @"attribute vec4 position;\nattribute vec4 inputTextureCoordinate;\n\nvarying vec2 textureCoordinate;\n\nvoid main()\n{\n\tgl_Position = position;\n\ttextureCoordinate = inputTextureCoordinate.xy;\n}\n";
+NSString *const kGPUImageInitialVertexShaderString = @"attribute vec4 position;\nattribute vec4 inputTextureCoordinate;\n\nvarying vec2 textureCoordinate;\n\n\nvoid main()\n{\n\tgl_Position = position;\n\ttextureCoordinate = inputTextureCoordinate.xy;\n}\n";
 
-NSString *const kGPUImageInitialFragmentShaderString = @"varying vec2 textureCoordinate;\n\nuniform sampler2D inputImageTexture;\n\nvoid main()\n{\n\tvec4 originalColor = texture2D(inputImageTexture, textureCoordinate);\n\tgl_FragColor = originalColor;\n\tvec2 fragCoord = textureCoordinate;\n\tfloat iGlobalTime = 3.0;\n\tvec2 iResolution = vec2(1.0 ,1.0);\n}\n";
+NSString *const kGPUImageInitialFragmentShaderString = @"varying vec2 textureCoordinate;\n\nuniform sampler2D inputImageTexture;\nuniform sampler2D inputImageTexture2;\nuniform sampler2D inputImageTexture3;\nuniform float time;\nuniform float randomValue;\nvoid main()\n{\n\tvec4 originalColor = texture2D(inputImageTexture, textureCoordinate);\n\tgl_FragColor = originalColor;\n\tvec2 fragCoord = textureCoordinate;\n\t}\n";
 
 
 @interface ShaderDesignerWindowController ()
+
+@property (nonatomic, strong) GPUImagePicture *lookupTableImage;
+@property (nonatomic, strong) GPUImagePicture *shineImage;
 
 @end
 
@@ -25,6 +29,9 @@ NSString *const kGPUImageInitialFragmentShaderString = @"varying vec2 textureCoo
     self.previewView.fillMode = kGPUImageFillModePreserveAspectRatioAndFill;
 
     [inputCamera startCameraCapture];
+    
+    self.shineImage = [[GPUImagePicture alloc] initWithImage:[NSImage imageNamed:@"bokeh_texture2"]];
+    self.lookupTableImage = [[GPUImagePicture alloc] initWithImage:[NSImage imageNamed:@"shine"]];
 
     [self compile:self];
 }
@@ -61,9 +68,18 @@ NSString *const kGPUImageInitialFragmentShaderString = @"varying vec2 textureCoo
         [inputCamera removeTarget:testFilter];
         [testFilter removeTarget:self.shaderOutputView];
     }
-    testFilter = [[GPUImageFilter alloc] initWithVertexShaderFromString:self.vertexShader fragmentShaderFromString:self.fragmentShader];
+    testFilter = [[GPUImageTestFilter alloc] initWithVertexShaderFromString:self.vertexShader fragmentShaderFromString:self.fragmentShader];
     
     [inputCamera addTarget:testFilter];
+    
+    [self.shineImage removeAllTargets];
+    [self.shineImage processImage];
+    [self.shineImage addTarget:testFilter atTextureLocation:1];
+    
+    [self.lookupTableImage removeAllTargets];
+    [self.lookupTableImage processImage];
+    [self.lookupTableImage addTarget:testFilter atTextureLocation:2];
+    
     [testFilter addTarget:self.shaderOutputView];
     
     [inputCamera resumeCameraCapture];

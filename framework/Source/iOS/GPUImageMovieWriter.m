@@ -217,7 +217,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
                                              encoding:NSUTF8StringEncoding];
         
         BOOL useLowBitRate = NO;
-        if ([model rangeOfString:@"iPhone9"].location == NSNotFound) {
+        if ([model rangeOfString:@"iPhone9"].location == NSNotFound && [model rangeOfString:@"iPhone10"].location == NSNotFound) {
             //not iphone 7
             useLowBitRate = YES;
         }
@@ -225,6 +225,13 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
             NSDictionary *codecSettings = [NSDictionary dictionaryWithObjectsAndKeys:
                                            [NSNumber numberWithInt:4000*1024], AVVideoAverageBitRateKey,
                                            [NSNumber numberWithInt:4000*1024], AVVideoAverageBitRateKey,
+                                           [NSNumber numberWithInt:30],AVVideoMaxKeyFrameIntervalKey,
+                                           nil];
+            [settings setObject:codecSettings forKey:AVVideoCompressionPropertiesKey];
+        } else {
+            NSDictionary *codecSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+                                           [NSNumber numberWithInt:10000*1024], AVVideoAverageBitRateKey,
+                                           [NSNumber numberWithInt:10000*1024], AVVideoAverageBitRateKey,
                                            [NSNumber numberWithInt:30],AVVideoMaxKeyFrameIntervalKey,
                                            nil];
             [settings setObject:codecSettings forKey:AVVideoCompressionPropertiesKey];

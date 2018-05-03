@@ -1124,14 +1124,14 @@
         [currentlySelectedFilter removeTarget:self.glView];
 
         GPUImageCrosshairGenerator *crosshairGenerator = [[GPUImageCrosshairGenerator alloc] init];
-        crosshairGenerator.crosshairWidth = 15.0;
+        crosshairGenerator.crosshairWidth = 65.0;
         [crosshairGenerator forceProcessingAtSize:[self.glView sizeInPixels]];
         
         [(GPUImageHarrisCornerDetectionFilter *)currentlySelectedFilter setCornersDetectedBlock:^(GLfloat* cornerArray, NSUInteger cornersDetected, CMTime frameTime) {
             [crosshairGenerator renderCrosshairsFromArray:cornerArray count:cornersDetected frameTime:frameTime];
         }];
         
-        GPUImageAlphaBlendFilter *blendFilter = [[GPUImageAlphaBlendFilter alloc] init];
+        GPUImageAlphaBlendFilter *blendFilter = [[GPUImageAddBlendFilter alloc] init];
         [blendFilter forceProcessingAtSize:[self.glView sizeInPixels]];
         GPUImageGammaFilter *gammaFilter = [[GPUImageGammaFilter alloc] init];
         [inputCamera addTarget:gammaFilter];

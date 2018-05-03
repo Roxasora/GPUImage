@@ -14,6 +14,10 @@
 		BCD95D3D1A742CFD00BC4F64 /* ShaderDesignerWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = BCD95D3B1A742CFD00BC4F64 /* ShaderDesignerWindowController.m */; };
 		BCD95D3E1A742CFD00BC4F64 /* ShaderDesignerWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = BCD95D3C1A742CFD00BC4F64 /* ShaderDesignerWindowController.xib */; };
 		BCF8E9D21A75D7A0005AE243 /* GPUImage.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BCD95D451A7442FB00BC4F64 /* GPUImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D98745421FF22C5F008DF312 /* GPUImageTestFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = D98745411FF22C5F008DF312 /* GPUImageTestFilter.m */; };
+		D9A78E66203E8B4B00BA96D5 /* bokeh_texture2.png in Resources */ = {isa = PBXBuildFile; fileRef = D9A78E65203E8B4B00BA96D5 /* bokeh_texture2.png */; };
+		D9A78E6B203FCB8000BA96D5 /* shine.png in Resources */ = {isa = PBXBuildFile; fileRef = D9A78E6A203FCB7F00BA96D5 /* shine.png */; };
+		D9DB9663203E80EB007C56A5 /* bokeh_texture.png in Resources */ = {isa = PBXBuildFile; fileRef = D9DB9662203E80EB007C56A5 /* bokeh_texture.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +62,11 @@
 		BCD95D3B1A742CFD00BC4F64 /* ShaderDesignerWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ShaderDesignerWindowController.m; sourceTree = "<group>"; };
 		BCD95D3C1A742CFD00BC4F64 /* ShaderDesignerWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ShaderDesignerWindowController.xib; sourceTree = "<group>"; };
 		BCD95D401A7442FB00BC4F64 /* GPUImageMac.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GPUImageMac.xcodeproj; path = ../../../../framework/GPUImageMac.xcodeproj; sourceTree = "<group>"; };
+		D98745401FF22C5F008DF312 /* GPUImageTestFilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GPUImageTestFilter.h; sourceTree = "<group>"; };
+		D98745411FF22C5F008DF312 /* GPUImageTestFilter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GPUImageTestFilter.m; sourceTree = "<group>"; };
+		D9A78E65203E8B4B00BA96D5 /* bokeh_texture2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bokeh_texture2.png; sourceTree = "<group>"; };
+		D9A78E6A203FCB7F00BA96D5 /* shine.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = shine.png; sourceTree = "<group>"; };
+		D9DB9662203E80EB007C56A5 /* bokeh_texture.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bokeh_texture.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,9 +99,14 @@
 		BCD95D191A742B4300BC4F64 /* ShaderDesigner */ = {
 			isa = PBXGroup;
 			children = (
+				D9DB9662203E80EB007C56A5 /* bokeh_texture.png */,
+				D9A78E65203E8B4B00BA96D5 /* bokeh_texture2.png */,
+				D9A78E6A203FCB7F00BA96D5 /* shine.png */,
 				BCD95D1C1A742B4300BC4F64 /* AppDelegate.h */,
 				BCD95D1D1A742B4300BC4F64 /* AppDelegate.m */,
 				BCD95D231A742B4300BC4F64 /* MainMenu.xib */,
+				D98745401FF22C5F008DF312 /* GPUImageTestFilter.h */,
+				D98745411FF22C5F008DF312 /* GPUImageTestFilter.m */,
 				BCD95D3A1A742CFD00BC4F64 /* ShaderDesignerWindowController.h */,
 				BCD95D3B1A742CFD00BC4F64 /* ShaderDesignerWindowController.m */,
 				BCD95D3C1A742CFD00BC4F64 /* ShaderDesignerWindowController.xib */,
@@ -153,6 +167,8 @@
 				TargetAttributes = {
 					BCD95D161A742B4300BC4F64 = {
 						CreatedOnToolsVersion = 6.1.1;
+						DevelopmentTeam = Q956A2A624;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -196,7 +212,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				BCD95D3E1A742CFD00BC4F64 /* ShaderDesignerWindowController.xib in Resources */,
+				D9A78E6B203FCB8000BA96D5 /* shine.png in Resources */,
+				D9DB9663203E80EB007C56A5 /* bokeh_texture.png in Resources */,
 				BCD95D221A742B4300BC4F64 /* Images.xcassets in Resources */,
+				D9A78E66203E8B4B00BA96D5 /* bokeh_texture2.png in Resources */,
 				BCD95D251A742B4300BC4F64 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -208,6 +227,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D98745421FF22C5F008DF312 /* GPUImageTestFilter.m in Sources */,
 				BCD95D3D1A742CFD00BC4F64 /* ShaderDesignerWindowController.m in Sources */,
 				BCD95D201A742B4300BC4F64 /* main.m in Sources */,
 				BCD95D1E1A742B4300BC4F64 /* AppDelegate.m in Sources */,
@@ -316,10 +336,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = Q956A2A624;
 				INFOPLIST_FILE = ShaderDesigner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sunsetlakesoftware.ShaderDesignerdsds;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -327,10 +352,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = Q956A2A624;
 				INFOPLIST_FILE = ShaderDesigner/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.sunsetlakesoftware.ShaderDesignerdsds;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};

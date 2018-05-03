@@ -444,10 +444,10 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
             NSLog(@"playeritem output has no new pixel buffer for time %lld,%d", outputItemTime.value, outputItemTime.timescale);
         }
     } else {
-//        if (_playerItem && CMTimeGetSeconds(outputItemTime) > 0.2) {
-//            if (_playerItem.outputs.count == 0) {
-//                [_playerItem addOutput:playerItemOutput];
-//            } else {
+//        if (_playerItem.outputs.count == 0) {
+//            [_playerItem addOutput:playerItemOutput];
+//        } else {
+//            if (_playerItem && CMTimeGetSeconds(outputItemTime) > 0.2) {
 //                [_playerItem removeOutput:playerItemOutput];
 //            }
 //        }

@@ -95,13 +95,13 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     
 //    float version = [[[UIDevice currentDevice] systemVersion] floatValue];
     
-    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 10.0) {
+    if (@available(iOS 10.0, *)) {
         AVCaptureDevice *duoDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInDuoCamera mediaType:AVMediaTypeVideo position:cameraPosition];
         if (duoDevice) {
             _inputCamera = duoDevice;
         } else {
             AVCaptureDevice *wideDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera mediaType:AVMediaTypeVideo position:cameraPosition];
-//            AVCaptureDevice *wideDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+            //            AVCaptureDevice *wideDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
             _inputCamera = wideDevice;
         }
 //        [_inputCamera lockForConfiguration:nil];
@@ -791,6 +791,8 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     }
 
 	CMTime currentTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+    
+//    NSLog(@"frame time %lf", CMTimeGetSeconds(currentTime));
 
     [GPUImageContext useImageProcessingContext];
 

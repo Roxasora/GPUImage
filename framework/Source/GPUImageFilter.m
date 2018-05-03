@@ -163,7 +163,7 @@ NSString *const kGPUImagePassthroughFragmentShaderString = SHADER_STRING
     }
 #endif
 
-    NSLog(@"gpuimage filter dealloced %@", self);
+//    NSLog(@"gpuimage filter dealloced %@", self);
 
 }
 
@@ -470,8 +470,8 @@ NSString *const kGPUImagePassthroughFragmentShaderString = SHADER_STRING
         [GPUImageContext setActiveShaderProgram:shaderProgram];
         [self setAndExecuteUniformStateCallbackAtIndex:uniform forProgram:shaderProgram toBlock:^{
             GLfloat positionArray[2];
-            positionArray[0] = pointValue.x;
-            positionArray[1] = pointValue.y;
+            positionArray[0] = (float)pointValue.x;
+            positionArray[1] = (float)pointValue.y;
             
             glUniform2fv(uniform, 1, positionArray);
         }];

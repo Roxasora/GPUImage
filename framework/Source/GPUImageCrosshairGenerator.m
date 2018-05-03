@@ -50,7 +50,25 @@ NSString *const kGPUImageCrosshairFragmentShaderString = SHADER_STRING
      vec2 distanceFromCenter = abs(centerLocation - gl_PointCoord.xy);
      float axisTest = step(pointSpacing, gl_PointCoord.y) * step(distanceFromCenter.x, 0.09) + step(pointSpacing, gl_PointCoord.x) * step(distanceFromCenter.y, 0.09);
      
-     gl_FragColor = vec4(crosshairColor * axisTest, axisTest);
+     vec2 pos = gl_PointCoord.xy;
+     
+     float minBright = 0.01;
+     float maxBright = 0.04;
+     float magnitude = (minBright + abs(0.1 * (maxBright - minBright)));
+     
+     vec2 dist = distanceFromCenter;
+     // add pointiness
+     float longDist = max(dist.x / 18.0, dist.y / 20.0);
+     dist += longDist / 2.0;
+     vec2 uv = magnitude / dist;
+     
+     float brightness = (uv.x + uv.y) / 0.5;
+     
+     vec3 rgb = vec3(brightness);
+     
+     gl_FragColor = vec4(rgb * brightness, 1.0);
+     
+     //gl_FragColor = vec4(crosshairColor * axisTest, axisTest);
      //     gl_FragColor = vec4(distanceFromCenterInX, distanceFromCenterInY, 0.0, 1.0);
  }
 );
