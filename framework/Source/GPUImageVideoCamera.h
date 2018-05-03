@@ -142,6 +142,8 @@ void setColorConversion709( GLfloat conversionMatrix[9] );
  */
 - (void)rotateCamera:(NSString *)frontCameraPreset backPreset:(NSString *)backCameraPreset;
 
+- (void)rotateCamera;
+
 /// @name Benchmarking
 
 /** When benchmarking is enabled, this will keep a running average of the time from uploading, processing, and final recording or display

@@ -510,6 +510,10 @@ void setColorConversion709( GLfloat conversionMatrix[9] )
     }
 }
 
+- (void)rotateCamera {
+    [self rotateCamera:AVCaptureSessionPreset1280x720 backPreset:AVCaptureSessionPreset1920x1080];
+}
+
 - (AVCaptureDevicePosition)cameraPosition
 {
     return [[videoInput device] position];
