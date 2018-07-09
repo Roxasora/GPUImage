@@ -225,6 +225,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
             NSDictionary *codecSettings = [NSDictionary dictionaryWithObjectsAndKeys:
                                            [NSNumber numberWithInt:4000*1024], AVVideoAverageBitRateKey,
                                            [NSNumber numberWithInt:4000*1024], AVVideoAverageBitRateKey,
+                                           AVVideoH264EntropyModeCABAC, AVVideoH264EntropyModeKey,
                                            [NSNumber numberWithInt:30],AVVideoMaxKeyFrameIntervalKey,
                                            nil];
             [settings setObject:codecSettings forKey:AVVideoCompressionPropertiesKey];
@@ -233,6 +234,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
                                            [NSNumber numberWithInt:10000*1024], AVVideoAverageBitRateKey,
                                            [NSNumber numberWithInt:10000*1024], AVVideoAverageBitRateKey,
                                            [NSNumber numberWithInt:30],AVVideoMaxKeyFrameIntervalKey,
+                                           AVVideoH264EntropyModeCABAC, AVVideoH264EntropyModeKey,
                                            nil];
             [settings setObject:codecSettings forKey:AVVideoCompressionPropertiesKey];
         }
@@ -312,10 +314,10 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     alreadyFinishedRecording = NO;
     startTime = kCMTimeInvalid;
     runSynchronouslyOnContextQueue(_movieWriterContext, ^{
-        if (audioInputReadyCallback == NULL)
+        if (self->audioInputReadyCallback == NULL)
         {
-            [assetWriter startWriting];
-            allowWriteAudio = NO;
+            [self->assetWriter startWriting];
+            self->allowWriteAudio = NO;
         }
     });
     isRecording = YES;
@@ -999,11 +1001,11 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
             
             audioOutputSettings = [NSDictionary dictionaryWithObjectsAndKeys:
                                          [ NSNumber numberWithInt: kAudioFormatMPEG4AAC], AVFormatIDKey,
-                                         [ NSNumber numberWithInt: 1 ], AVNumberOfChannelsKey,
+                                         [ NSNumber numberWithInt: 2 ], AVNumberOfChannelsKey,
                                          [ NSNumber numberWithFloat: preferredHardwareSampleRate ], AVSampleRateKey,
                                          [ NSData dataWithBytes: &acl length: sizeof( acl ) ], AVChannelLayoutKey,
-                                         //[ NSNumber numberWithInt:AVAudioQualityLow], AVEncoderAudioQualityKey,
-                                         [ NSNumber numberWithInt: 64000 ], AVEncoderBitRateKey,
+                                         [ NSNumber numberWithInt:AVAudioQualityHigh], AVEncoderAudioQualityKey,
+                                         [ NSNumber numberWithInt: 128000 ], AVEncoderBitRateKey,
                                          nil];
 /*
             AudioChannelLayout acl;
