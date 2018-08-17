@@ -11,9 +11,12 @@
 @interface GPUImageTestFilter : GPUImageThreeInputFilter {
     GLint timeUniform;
     GLint randomValueUniform;
+    GLint progressUniform;
 }
 
 @property(readwrite, nonatomic) CGFloat time;
+
+@property(readwrite, nonatomic) CGFloat progress;
 
 @property(readwrite, nonatomic) CGFloat randomValue;
 

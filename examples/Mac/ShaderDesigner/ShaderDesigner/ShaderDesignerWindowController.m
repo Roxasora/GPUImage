@@ -1,9 +1,9 @@
 #import "ShaderDesignerWindowController.h"
 #import "GPUImageTestFilter.h"
 
-NSString *const kGPUImageInitialVertexShaderString = @"attribute vec4 position;\nattribute vec4 inputTextureCoordinate;\n\nvarying vec2 textureCoordinate;\n\n\nvoid main()\n{\n\tgl_Position = position;\n\ttextureCoordinate = inputTextureCoordinate.xy;\n}\n";
+NSString *const kGPUImageInitialVertexShaderString = @"attribute vec4 position;\nattribute vec4 inputTextureCoordinate;\nattribute vec4 inputTextureCoordinate2;\n\nvarying vec2 textureCoordinate;varying vec2 textureCoordinate2;\nvarying vec2 textureCoordinate3;\n\n\nvoid main()\n{\n\tgl_Position = position;\n\ttextureCoordinate = inputTextureCoordinate.xy;\n\ttextureCoordinate2 = inputTextureCoordinate2.xy;\n}\n";
 
-NSString *const kGPUImageInitialFragmentShaderString = @"varying vec2 textureCoordinate;\n\nuniform sampler2D inputImageTexture;\nuniform sampler2D inputImageTexture2;\nuniform sampler2D inputImageTexture3;\nuniform float time;\nuniform float randomValue;\nvoid main()\n{\n\tvec4 originalColor = texture2D(inputImageTexture, textureCoordinate);\n\tgl_FragColor = originalColor;\n\tvec2 fragCoord = textureCoordinate;\n\t}\n";
+NSString *const kGPUImageInitialFragmentShaderString = @"varying vec2 textureCoordinate;\nvarying vec2 textureCoordinate;\n\nuniform sampler2D inputImageTexture;\nuniform sampler2D inputImageTexture2;\nuniform float time;\nuniform float progress;\nuniform float randomValue;\nvoid main()\n{\n\tvec4 from = texture2D(inputImageTexture, textureCoordinate);\n\tvec4 to = texture2D(inputImageTexture3, textureCoordinate);\n\tgl_FragColor = mix(from, to ,progress);\n\t}\n";
 
 
 @interface ShaderDesignerWindowController ()
@@ -72,13 +72,13 @@ NSString *const kGPUImageInitialFragmentShaderString = @"varying vec2 textureCoo
     
     [inputCamera addTarget:testFilter];
     
-    [self.shineImage removeAllTargets];
-    [self.shineImage processImage];
-    [self.shineImage addTarget:testFilter atTextureLocation:1];
-    
     [self.lookupTableImage removeAllTargets];
     [self.lookupTableImage processImage];
-    [self.lookupTableImage addTarget:testFilter atTextureLocation:2];
+    [self.lookupTableImage addTarget:testFilter atTextureLocation:1];
+    
+    [self.shineImage removeAllTargets];
+    [self.shineImage processImage];
+    [self.shineImage addTarget:testFilter atTextureLocation:2];
     
     [testFilter addTarget:self.shaderOutputView];
     
