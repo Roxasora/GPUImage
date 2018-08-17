@@ -206,7 +206,7 @@
     AVAssetReader *assetReader = [AVAssetReader assetReaderWithAsset:self.asset error:&error];
 
     NSMutableDictionary *outputSettings = [NSMutableDictionary dictionary];
-    if ([GPUImageContext supportsFastTextureUpload] && [GPUImageContext sharedImageProcessingContext].useYuvFormat) {
+    if ([GPUImageContext supportsFastTextureUpload]) {
         [outputSettings setObject:@(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) forKey:(id)kCVPixelBufferPixelFormatTypeKey];
         isFullYUVRange = YES;
     }
@@ -357,7 +357,7 @@
 - (void)generateVideoOutput {
     dispatch_queue_t videoProcessingQueue = [GPUImageContext sharedContextQueue];
     NSMutableDictionary *pixBuffAttributes = [NSMutableDictionary dictionary];
-    if ([GPUImageContext supportsFastTextureUpload] && [GPUImageContext sharedImageProcessingContext].useYuvFormat) {
+    if ([GPUImageContext supportsFastTextureUpload]) {
         [pixBuffAttributes setObject:@(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) forKey:(id)kCVPixelBufferPixelFormatTypeKey];
     }
     else {
@@ -618,7 +618,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
     // Fix issue 1580
     [GPUImageContext useImageProcessingContext];
     
-    if ([GPUImageContext supportsFastTextureUpload] && [GPUImageContext sharedImageProcessingContext].useYuvFormat)
+    if ([GPUImageContext supportsFastTextureUpload])
     {
         
 #if TARGET_IPHONE_SIMULATOR || TARGET_OS_IPHONE
@@ -813,7 +813,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
         
         int bytesPerRow = (int) CVPixelBufferGetBytesPerRow(movieFrame);
         
-        outputFramebuffer = [[GPUImageContext sharedFramebufferCache] fetchFramebufferForSize:CGSizeMake(bytesPerRow / 4, bufferHeight) onlyTexture:YES];
+        outputFramebuffer = [[GPUImageContext sharedFramebufferCache] fetchFramebufferForSize:CGSizeMake(bytesPerRow / 4,  bufferHeight) onlyTexture:YES];
         
         glBindTexture(GL_TEXTURE_2D, [outputFramebuffer texture]);
         // Using BGRA extension to pull in video frame data directly
@@ -824,7 +824,7 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
         {
             NSInteger indexOfObject = [targets indexOfObject:currentTarget];
             NSInteger targetTextureIndex = [[targetTextureIndices objectAtIndex:indexOfObject] integerValue];
-            [currentTarget setInputSize:CGSizeMake(bytesPerRow / 4, bufferHeight) atIndex:targetTextureIndex];
+            [currentTarget setInputSize:CGSizeMake(bufferWidth, bufferHeight) atIndex:targetTextureIndex];
             [currentTarget setInputFramebuffer:outputFramebuffer atIndex:targetTextureIndex];
         }
         
