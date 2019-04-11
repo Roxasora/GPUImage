@@ -140,7 +140,7 @@
 {
     [playerItemOutput setDelegate:nil queue:nil];
     
-    NSLog(@"gpumovie dealloced");
+    NSLog(@"😆 gpumovie dealloced");
     
     // Moved into endProcessing
     //if (self.playerItem && (displayLink != nil))
@@ -148,6 +148,8 @@
     //    [displayLink invalidate]; // remove from all run loops
     //    displayLink = nil;
     //}
+    
+    synchronizedMovieWriter = nil;
 }
 
 #pragma mark - Movie processing
