@@ -22,21 +22,30 @@
     randomValueUniform = [filterProgram uniformIndex:@"randomValue"];
     self.randomValue = 0.0;
     
+    manyRandomeValueUniform = [filterProgram uniformIndex:@"manyRandomValue"];
+    self.manyRandomValue = @[];
+    
     return self;
 }
 
 
 - (void)informTargetsAboutNewFrameAtTime:(CMTime)frameTime {
-    float currentTime = CMTimeGetSeconds(frameTime);
-    self.time = fmod(currentTime, 600);
+    CGFloat currentTime = CMTimeGetSeconds(frameTime);
+    self.time = fmodl(currentTime, 600);
     self.progress = MIN(1.0, fmod(currentTime, 4.0) / 2.0);
     NSLog(@"%lf", self.progress);
     
     float mixProgress = pow(cos((self.progress-0.5)*6.0), 1.5);
     NSLog(@"%lf", mixProgress);
     
-    
     self.randomValue = (float)(arc4random() % 1000) / 1000.0;
+    
+    NSMutableArray *randomArray = [NSMutableArray array];
+    for (int i = 0; i < 60; i++) {
+        [randomArray addObject:[NSNumber numberWithDouble:(float)(arc4random() % 1000) / 1000.0]];
+        [randomArray addObject:[NSNumber numberWithDouble:(float)(arc4random() % 1000) / 1000.0]];
+    }
+    self.manyRandomValue = randomArray;
     
     [super informTargetsAboutNewFrameAtTime:frameTime];
 }
@@ -54,6 +63,18 @@
 - (void)setRandomValue:(CGFloat)randomValue {
     _randomValue = randomValue;
     [self setFloat:randomValue forUniform:randomValueUniform program:filterProgram];
+}
+
+
+- (void)setManyRandomValue:(NSArray *)manyRandomValue {
+    _manyRandomValue = manyRandomValue;
+    
+    GLfloat *floatArray = malloc([manyRandomValue count] * sizeof(GLfloat));
+    [manyRandomValue enumerateObjectsWithOptions:NSEnumerationConcurrent usingBlock:^(NSNumber *number, NSUInteger idx, BOOL *stop) {
+        floatArray[idx] = [number floatValue];
+    }];
+    
+    [self setFloatArray:floatArray length:120 forUniform:manyRandomeValueUniform program:filterProgram];
 }
 
 
