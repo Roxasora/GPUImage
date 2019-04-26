@@ -39,8 +39,6 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     
     BOOL allowWriteAudio, willFinish;
     
-    BOOL isFirstAudioBuffer;
-    
     void(^completeHandler)(void);
 }
 
@@ -97,8 +95,6 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     allowWriteAudio = NO;
     willFinish = NO;
 
-    isFirstAudioBuffer = YES;
-    
     discont = NO;
     videoSize = newSize;
     movieURL = newMovieURL;
@@ -417,9 +413,7 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
             [assetWriterAudioInput markAsFinished];
         }
 
-        // iOS 6 SDK
         if ([assetWriter respondsToSelector:@selector(finishWritingWithCompletionHandler:)]) {
-            // Running iOS 6
             if (@available(iOS 6.0, *)) {
                 [assetWriter finishWritingWithCompletionHandler:^{
                     if (handler) {
@@ -446,10 +440,6 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
         CFRetain(audioBuffer);
 
         CMTime currentSampleTime = CMSampleBufferGetOutputPresentationTimeStamp(audioBuffer);
-        if (CMTimeGetSeconds(currentSampleTime) < 0) {
-//            offsetTime = CMTimeMake(-currentSampleTime.value, currentSampleTime.timescale);
-//            currentSampleTime = kCMTimeZero;
-        }
         
         if (CMTIME_IS_INVALID(startTime))
         {
@@ -540,10 +530,23 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
             }
             else if(assetWriter.status == AVAssetWriterStatusWriting)
             {
-                if (![assetWriterAudioInput appendSampleBuffer:audioBuffer]) {
-                    NSLog(@"Problem appending audio buffer at time: %@", CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, currentSampleTime)));
+                @try {
+                    if (![assetWriterAudioInput appendSampleBuffer:audioBuffer]) {
+                        NSLog(@"Problem appending audio buffer at time: %@", CFBridgingRelease(CMTimeCopyDescription(kCFAllocatorDefault, currentSampleTime)));
+                    }
+                } @catch (NSException *exception) {
+                    if (failureBlock) {
+                        completeHandler = nil;
+                        completionBlock = nil;
+                        
+                        if (failureBlock)
+                        {
+                            failureBlock([NSError errorWithDomain:@"VUEErrorDomain" code:87877 userInfo:nil]);
+                            failureBlock = nil;
+                        }
+                    }
+                } @finally {
                 }
-                    
             }
             else
             {
@@ -573,7 +576,11 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
 {
     if (videoInputReadyCallback != NULL)
     {
-        if( assetWriter.status != AVAssetWriterStatusWriting )
+        if (assetWriter.status == AVAssetWriterStatusFailed) {
+            
+            return;
+        }
+        if( assetWriter.status != AVAssetWriterStatusWriting)
         {
             [assetWriter startWriting];
         }
@@ -692,14 +699,14 @@ NSString *const kGPUImageColorSwizzlingFragmentShaderString = SHADER_STRING
     
 	
 	__unused GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        
+    if (status != GL_FRAMEBUFFER_COMPLETE && failureBlock) {
         completeHandler = nil;
         completionBlock = nil;
         
         if (failureBlock)
         {
             failureBlock([NSError errorWithDomain:@"VUEErrorDomain" code:87877 userInfo:nil]);
+            failureBlock = nil;
         }
     }
 //    NSAssert(status == GL_FRAMEBUFFER_COMPLETE, @"Incomplete filter FBO: %d", status);
