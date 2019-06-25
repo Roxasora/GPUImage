@@ -433,6 +433,19 @@ static CVReturn renderCallback(CVDisplayLinkRef displayLink,
 }
 #endif
 
+static CVPixelBufferRef lastPixelBuffer;
+
+- (void)processStaticPixelBufferAtTime:(CMTime)outputItemTime {
+    __unsafe_unretained GPUImageMovie *weakSelf = self;
+    CVPixelBufferRef pixelBuffer = [playerItemOutput copyPixelBufferForItemTime:outputItemTime itemTimeForDisplay:NULL];
+    if( pixelBuffer ) {
+        runSynchronouslyOnVideoProcessingQueue(^{
+            [weakSelf processMovieFrame:pixelBuffer withSampleTime:outputItemTime];
+            CFRelease(pixelBuffer);
+        });
+    }
+}
+
 - (void)processPixelBufferAtTime:(CMTime)outputItemTime {
     if ([playerItemOutput hasNewPixelBufferForItemTime:outputItemTime]) {
         __unsafe_unretained GPUImageMovie *weakSelf = self;

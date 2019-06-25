@@ -64,6 +64,7 @@
 - (void)endProcessing;
 - (void)cancelProcessing;
 - (void)processMovieFrame:(CMSampleBufferRef)movieSampleBuffer;
+- (void)processStaticPixelBufferAtTime:(CMTime)outputItemTime;
 
 - (float)assetDuration;
 
