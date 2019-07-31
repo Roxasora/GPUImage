@@ -369,8 +369,9 @@
         if (_playerItem) {
             [_playerItem removeOutput:playerItemOutput];
         }
-        [playerItemOutput setDelegate:nil queue:videoProcessingQueue];
+        [playerItemOutput setDelegate:nil queue:nil];
     }
+    
     playerItemOutput = [[AVPlayerItemVideoOutput alloc] initWithPixelBufferAttributes:pixBuffAttributes];
     [playerItemOutput setDelegate:self queue:videoProcessingQueue];
     
