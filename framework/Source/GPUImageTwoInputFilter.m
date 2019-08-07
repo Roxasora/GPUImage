@@ -84,6 +84,98 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
 #pragma mark -
 #pragma mark Rendering
 
+- (void)renderToTextureWithTexture:(GLenum)texture destTexture:(GLenum)destTexture size:(CGSize)size offscreenBufferHandle:(GLuint)offscreenBufferHandle;
+{
+    if (self.preventRendering)
+    {
+        [firstInputFramebuffer unlock];
+        [secondInputFramebuffer unlock];
+        return;
+    }
+    
+    GLenum error;
+    
+    [GPUImageContext setActiveShaderProgram:filterProgram];
+    outputFramebuffer = [[GPUImageContext sharedFramebufferCache] fetchFramebufferForSize:size textureOptions:self.outputTextureOptions onlyTexture:NO];
+    [outputFramebuffer activateFramebuffer];
+    error = glGetError();
+    glBindFramebuffer(GL_FRAMEBUFFER, offscreenBufferHandle);
+    
+    glBindTexture(GL_TEXTURE_2D, destTexture);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, destTexture, 0);
+    
+    glViewport(0, 0, size.width, size.height);
+    error = glGetError();
+    
+    
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    error = glGetError();
+    
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+        //        goto bail;
+    }
+
+    [self setUniformsForProgramAtIndex:0];
+    error = glGetError();
+    
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glUniform1i(filterInputTextureUniform, 2);
+    error = glGetError();
+    
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, [secondInputFramebuffer texture]);
+    glUniform1i(filterInputTextureUniform2, 3);
+    error = glGetError();
+    
+    glClearColor(1.0, 1.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    static const GLfloat imageVertices[] = {
+        -1.0f, -1.0f,
+        1.0f, -1.0f,
+        -1.0f,  1.0f,
+        1.0f,  1.0f,
+    };
+    static const GLfloat noRotationTextureCoordinates[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 1.0f,
+    };
+    
+    glVertexAttribPointer(filterPositionAttribute, 2, GL_FLOAT, 0, 0, imageVertices);
+    glVertexAttribPointer(filterTextureCoordinateAttribute, 2, GL_FLOAT, 0, 0, noRotationTextureCoordinates);
+    glVertexAttribPointer(filterSecondTextureCoordinateAttribute, 2, GL_FLOAT, 0, 0, noRotationTextureCoordinates);
+    error = glGetError();
+    
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    error = glGetError();
+    
+    glFlush();
+    error = glGetError();
+    
+    // 解绑纹理
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
+    // 解绑纹理
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
+    glFinish();
+
+    @try {
+        [firstInputFramebuffer unlock];
+        [secondInputFramebuffer unlock];
+    } @catch (NSException *exception) {
+    } @finally {
+    }
+}
+
 - (void)renderToTextureWithVertices:(const GLfloat *)vertices textureCoordinates:(const GLfloat *)textureCoordinates;
 {
     if (self.preventRendering)

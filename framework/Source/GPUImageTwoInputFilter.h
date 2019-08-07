@@ -18,4 +18,6 @@ extern NSString *const kGPUImageTwoInputTextureVertexShaderString;
 - (void)disableFirstFrameCheck;
 - (void)disableSecondFrameCheck;
 
+- (void)renderToTextureWithTexture:(GLenum)texture destTexture:(GLenum)destTexture size:(CGSize)size offscreenBufferHandle:(GLuint)offscreenBufferHandle;
+
 @end
