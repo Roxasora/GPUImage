@@ -84,7 +84,7 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
 #pragma mark -
 #pragma mark Rendering
 
-- (void)renderToTextureWithTexture:(GLenum)texture destTexture:(GLenum)destTexture size:(CGSize)size offscreenBufferHandle:(GLuint)offscreenBufferHandle;
+- (void)renderToTextureWithTexture:(GLenum)texture destTexture:(GLenum)destTexture size:(CGSize)size frameBufferObject:(GLuint)frameBufferObject;
 {
     if (self.preventRendering)
     {
@@ -100,7 +100,7 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
 //    [outputFramebuffer activateFramebuffer];
     
     //!设置离屏渲染 fbo
-    glBindFramebuffer(GL_FRAMEBUFFER, offscreenBufferHandle);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBufferObject);
     
     //!绑定目标 texture
     glActiveTexture(GL_TEXTURE0);
@@ -111,7 +111,7 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, destTexture, 0);
     
-    glViewport(0, 0, size.width, size.height);
+    glViewport(-100, -100, size.width, size.height);
     
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -152,21 +152,21 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    glFlush();
+//    glFlush();
 
     // 解绑纹理
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, 0);
+//    glActiveTexture(GL_TEXTURE2);
+//    glBindTexture(GL_TEXTURE_2D, 0);
     
     // 解绑纹理
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, 0);
+//    glActiveTexture(GL_TEXTURE3);
+//    glBindTexture(GL_TEXTURE_2D, 0);
     
     glFinish();
 
     @try {
-        [firstInputFramebuffer unlock];
-        [secondInputFramebuffer unlock];
+//        [firstInputFramebuffer unlock];
+//        [secondInputFramebuffer unlock];
     } @catch (NSException *exception) {
         NSLog(@"👌👌👌👌👌");
     } @finally {
