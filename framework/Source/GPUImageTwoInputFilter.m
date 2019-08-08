@@ -111,7 +111,7 @@ NSString *const kGPUImageTwoInputTextureVertexShaderString = SHADER_STRING
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, destTexture, 0);
     
-    glViewport(-100, -100, size.width, size.height);
+    glViewport(0, 0, size.width, size.height);
     
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
