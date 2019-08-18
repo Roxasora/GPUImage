@@ -266,6 +266,14 @@ void reportAvailableMemoryForGPUImage(NSString *tag)
         for (id<GPUImageInput> targetToRemove in targets)
         {
             NSInteger indexOfObject = [targets indexOfObject:targetToRemove];
+            
+            
+            //https://www.fabric.io/vue/ios/apps/video.vue.visionary/issues/30269050b72f1ad69fcf256ebf871ae2?time=last-thirty-days
+            if (indexOfObject >= targetTextureIndices.count) {
+                continue;
+            }
+            
+            
             NSInteger textureIndexOfTarget = [[targetTextureIndices objectAtIndex:indexOfObject] integerValue];
             
             [targetToRemove setInputSize:CGSizeZero atIndex:textureIndexOfTarget];
