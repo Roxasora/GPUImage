@@ -22,7 +22,14 @@
     GLfloat backgroundColorRed, backgroundColorGreen, backgroundColorBlue, backgroundColorAlpha;
 
     CGSize boundsSizeAtFrameBufferEpoch;
+    
 }
+
+/** 此属性是为了解决在非主线程不能访问 UIView.bounds 问题 */
+@property(assign, nonatomic) CGRect selfBounds;
+
+/** 此属性是为了解决在非主线程不能访问 UIView.layer 问题 */
+@property (nonatomic, strong) CAEAGLLayer *selfLayer;
 
 @property (assign, nonatomic) NSUInteger aspectRatio;
 
@@ -88,7 +95,8 @@
     inputRotation = kGPUImageNoRotation;
     self.opaque = YES;
     self.hidden = NO;
-    CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
+    self.selfLayer = (CAEAGLLayer *)self.layer;
+    CAEAGLLayer *eaglLayer = self.selfLayer;
     eaglLayer.opaque = YES;
     eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
 
@@ -165,8 +173,8 @@
     glGenRenderbuffers(1, &displayRenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, displayRenderbuffer);
 	
-    [[[GPUImageContext sharedImageProcessingContext] context] renderbufferStorage:GL_RENDERBUFFER fromDrawable:(CAEAGLLayer*)self.layer];
-	
+    [[[GPUImageContext sharedImageProcessingContext] context] renderbufferStorage:GL_RENDERBUFFER fromDrawable:self.selfLayer];
+
     GLint backingWidth, backingHeight;
 
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &backingWidth);
@@ -187,7 +195,7 @@
 	
     __unused GLuint framebufferCreationStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     NSAssert(framebufferCreationStatus == GL_FRAMEBUFFER_COMPLETE, @"Failure with display framebuffer generation for display of size: %f, %f", self.bounds.size.width, self.bounds.size.height);
-    boundsSizeAtFrameBufferEpoch = self.bounds.size;
+    boundsSizeAtFrameBufferEpoch = self.selfBounds.size;
 
     [self recalculateViewGeometry];
 }
